@@ -8,10 +8,22 @@ extern crate alloc;
 
 use alloc::{boxed::Box, rc::Rc, vec, vec::Vec};
 use bootloader::{entry_point, BootInfo};
-use bridi_os_2::{allocator, println};
+use bridi_os_2::{
+    allocator, println,
+    task::{simple_executor::SimpleExecutor, Task},
+};
 use core::panic::PanicInfo;
 
 entry_point!(kernel_main);
+
+async fn async_number() -> u32 {
+    42
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
+}
 
 fn kernel_main(boot_info: &'static BootInfo) -> ! {
     use bridi_os_2::memory;
@@ -47,6 +59,10 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
         "reference count is {} now",
         Rc::strong_count(&cloned_reference)
     );
+
+    let mut executor = SimpleExecutor::new();
+    executor.spawn(Task::new(example_task()));
+    executor.run();
 
     #[cfg(test)]
     test_main();
