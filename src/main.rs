@@ -70,6 +70,7 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     executor.run();
 }
 
+/// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
